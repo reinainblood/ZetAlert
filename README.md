@@ -1,1 +1,32 @@
-Hello world! Placeholder for real readme!
+# ZetAlert
+
+An application for Zetachain alerting and notification 
+
+## What it does
+
+
+## What it does not do
+
+
+## Developing
+
+Install dependencies with `npm install`, start a development server:
+
+```bash
+npm run dev
+
+# or start the server and open the app in a new browser tab
+npm run dev -- --open
+```
+
+## Building
+
+To create a production version of your app:
+
+```bash
+npm run build
+```
+
+You can preview the production build with `npm run preview`.
+
+> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
