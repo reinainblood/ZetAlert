@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-black">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZetAlert - Zetachain Monitoring and Alerting</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'zeta-blue': '#6BE4FF',
+                        'zeta-green': '#B5FF32',
+                        'zeta-pink': '#FF44FF',
+                        'zeta-teal': '#1E4E45',
+                        'zeta-dark': '#000000',
+                    }
+                }
+            }
+        }
+    </script>
+    <script type="text/javascript" src="https://cdn.statuspage.io/se-v2.js"></script>
+</head>
+<body class="bg-black text-zeta-blue font-sans min-h-screen">
+<header class="bg-zeta-teal/20 backdrop-blur-sm py-4 sticky top-0 z-50">
+    <div class="container mx-auto px-4">
+        <h1 class="text-4xl font-bold text-zeta-green">ZetAlert</h1>
+    </div>
+</header>
+
+<main class="container mx-auto px-4 py-8">
+    <section class="bg-zeta-teal/10 rounded-2xl shadow-lg shadow-zeta-blue/10 p-6 mb-8 border border-zeta-blue/20">
+        <h2 class="text-2xl font-semibold mb-4 text-zeta-green">Zetachain Status</h2>
+        <div id="status-display" class="bg-black/50 p-4 rounded-xl flex flex-col items-center justify-center border border-zeta-blue/20">
+            <div id="status-indicator" class="w-16 h-16 rounded-full mb-4"></div>
+            <p id="status-text" class="text-zeta-blue text-xl font-semibold"></p>
+        </div>
+    </section>
+
+    <section class="bg-zeta-teal/10 rounded-2xl shadow-lg shadow-zeta-pink/10 p-6 border border-zeta-pink/20">
+        <h2 class="text-2xl font-semibold mb-4 text-zeta-pink">Send Alert</h2>
+        <form id="alert-form" class="space-y-4">
+            <div>
+                <label for="message" class="block text-sm font-medium text-zeta-blue mb-1">Alert Message</label>
+                <textarea
+                        id="message"
+                        name="message"
+                        rows="4"
+                        class="w-full px-3 py-2 bg-black text-zeta-blue border border-zeta-blue/20 rounded-xl focus:outline-none focus:border-zeta-pink focus:ring-1 focus:ring-zeta-pink resize-none"
+                        required
+                ></textarea>
+            </div>
+            <div>
+                <p class="block text-sm font-medium text-zeta-blue mb-1">Send to:</p>
+                <div class="space-y-2">
+                    <label class="inline-flex items-center">
+                        <input type="checkbox" name="platform" value="discord" class="form-checkbox text-zeta-green border-zeta-blue/20 bg-black rounded">
+                        <span class="ml-2 text-zeta-blue">Discord</span>
+                    </label>
+                    <label class="inline-flex items-center ml-4">
+                        <input type="checkbox" name="platform" value="slack" class="form-checkbox text-zeta-green border-zeta-blue/20 bg-black rounded">
+                        <span class="ml-2 text-zeta-blue">Slack</span>
+                    </label>
+                    <label class="inline-flex items-center ml-4">
+                        <input type="checkbox" name="platform" value="telegram" class="form-checkbox text-zeta-green border-zeta-blue/20 bg-black rounded">
+                        <span class="ml-2 text-zeta-blue">Telegram</span>
+                    </label>
+                    <label class="inline-flex items-center ml-4">
+                        <input type="checkbox" name="platform" value="all" class="form-checkbox text-zeta-pink border-zeta-blue/20 bg-black rounded">
+                        <span class="ml-2 text-zeta-blue">All Platforms</span>
+                    </label>
+                </div>
+            </div>
+            <div>
+                <button
+                        type="submit"
+                        class="bg-zeta-green text-black px-6 py-2 rounded-xl hover:bg-zeta-blue focus:outline-none focus:ring-2 focus:ring-zeta-pink focus:ring-opacity-50 transition-all duration-300 font-semibold"
+                >
+                    Send Alert
+                </button>
+            </div>
+        </form>
+        <div id="alert-feedback" class="mt-4 p-4 rounded-xl hidden"></div>
+    </section>
+</main>
+
+<footer class="bg-zeta-teal/20 text-zeta-blue/60 py-4 mt-8">
+    <div class="container mx-auto px-4 text-center">
+        <p>&copy; 2023 ZetAlert. All rights reserved.</p>
+    </div>
+</footer>
+
+<script>
+    // Status Page Integration
+    var sp = new StatusPage.page({ page : '482rp1161d5n' });
+
+    <script type="text/javascript" src="https://cdn.statuspage.io/se-v2.js"></script>
+<script>
+    var sp = new StatusPage.page({ page : '482rp1161d5n' });
+    sp.summary({
+        success : function(data) {
+            const summaryStatusIndicator = data.status.indicator
+            const summaryStatusDescription = data.status.descripton
+            let color, text;
+            switch (summaryStatusIndicator) {
+                case 'none':
+                    color = 'bg-zeta-green';
+
+                    break;
+                case 'minor':
+                    color = 'bg-yellow-500';
+                    text = 'Minor Issues';
+                    break;
+                case 'major':
+                    color = 'bg-orange-500';
+                    text = 'Major Issues';
+                    break;
+                case 'critical':
+                    color = 'bg-red-500';
+                    text = 'Critical Issues';
+                    break;
+                default:
+                    color = 'bg-gray-500';
+                    text = 'Status Unknown';
+
+            }
+        }
+    });
+</script>
+    // sp.summary({
+    //     success : function(data) {
+    //         const overallStatusIndicator = document.getElementById('status-indicator');
+    //         const overallStatusText = document.getElementById('status-text');
+    //         const status = data.status.indicator;
+    //
+    //         let color, text;
+    //         switch(status) {
+  /    //             case 'none':
+//                 color = 'bg-zeta-green';
+//                 text = 'All Systems Operational';
+//                 break;
+//             case 'minor':
+//                 color = 'bg-yellow-500';
+//                 text = 'Minor Issues';
+//                 break;
+//             case 'major':
+//                 color = 'bg-orange-500';
+//                 text = 'Major Issues';
+//                 break;
+//             case 'critical':
+//                 color = 'bg-red-500';
+//                 text = 'Critical Issues';
+//                 break;
+//             default:
+//                 color = 'bg-gray-500';
+//                 text = 'Status Unknown';
+/         }
+    //
+    //         statusIndicator.className = `w-16 h-16 rounded-full mb-4 ${color}`;
+    //         statusText.textContent = text;
+    //     }
+    // });
+
+    // Alert Form Submission
+    document.getElementById('alert-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const message = document.getElementById('message').value;
+        const platforms = Array.from(document.querySelectorAll('input[name="platform"]:checked')).map(el => el.value);
+
+        // Here you would typically send the data to your server
+        console.log('Sending alert:', { message, platforms });
+
+        // Show feedback
+        const feedbackEl = document.getElementById('alert-feedback');
+        feedbackEl.textContent = 'Alert sent successfully!';
+        feedbackEl.classList.remove('hidden');
+        feedbackEl.classList.add('bg-zeta-green/20', 'text-zeta-green', 'border', 'border-zeta-green/20');
+
+        // Reset form
+        this.reset();
+
+        // Hide feedback after 3 seconds
+        setTimeout(() => {
+            feedbackEl.classList.add('hidden');
+        }, 3000);
+    });
+</script>
+</body>
+</html>
