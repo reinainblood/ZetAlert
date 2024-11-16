@@ -1,7 +1,6 @@
 // src/app/api/auth/[...nextauth]/route.ts
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import bcrypt from 'bcryptjs';
 
 const handler = NextAuth({
     providers: [
@@ -18,21 +17,14 @@ const handler = NextAuth({
                         return null;
                     }
 
-                    const validUsername = process.env.DEMO_USER;
-                    const validPasswordHash = process.env.DEMO_PASS_HASH;
-
-                    if (!validUsername || !validPasswordHash) {
-                        console.error('Environment variables DEMO_USER or DEMO_PASS_HASH are not set');
-                        return null;
-                    }
-
-                    const isValidUsername = credentials.username === validUsername;
-                    const isValidPassword = await bcrypt.compare(credentials.password, validPasswordHash);
+                    // For development, use plain text password
+                    const isValidUsername = credentials.username === process.env.DEMO_USER;
+                    const isValidPassword = credentials.password === process.env.DEMO_PASS;
 
                     if (isValidUsername && isValidPassword) {
                         return {
                             id: '1',
-                            name: validUsername,
+                            name: credentials.username,
                         };
                     }
 
@@ -46,13 +38,20 @@ const handler = NextAuth({
     ],
     pages: {
         signIn: '/',
-        error: '/', // Redirect errors back to homepage
+        error: '/auth/error',
+    },
+    callbacks: {
+        async redirect({ url, baseUrl }) {
+            if (url.startsWith("/")) return `${baseUrl}${url}`
+            else if (new URL(url).origin === baseUrl) return url
+            return baseUrl + "/dashboard"
+        },
     },
     secret: process.env.NEXTAUTH_SECRET,
     session: {
         strategy: 'jwt',
     },
-    debug: process.env.NODE_ENV === 'development',
+    debug: true,
 });
 
 export const GET = handler;

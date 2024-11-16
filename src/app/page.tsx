@@ -2,15 +2,13 @@
 'use client';
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { AppLayout } from '@/components/AppLayout';
 
 export default function Home() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const router = useRouter();
-    const searchParams = useSearchParams();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -21,13 +19,14 @@ export default function Home() {
             const result = await signIn('credentials', {
                 username,
                 password,
-                redirect: false,
+                redirect: true,
+                callbackUrl: '/dashboard'
             });
 
+            // Note: This code won't run if redirect is true
+            // Keeping it as a fallback
             if (result?.error) {
                 setError('Invalid credentials');
-            } else {
-                router.push('/dashboard');
             }
         } catch (error) {
             setError('An error occurred. Please try again.');

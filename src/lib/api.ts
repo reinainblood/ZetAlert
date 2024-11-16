@@ -1,19 +1,32 @@
 // src/lib/api.ts
 import axios from 'axios';
-import { ZetaStatus } from './types';
+import { ZetaSummary } from './types';
 
 const ZETA_API_BASE = 'https://status.zetachain.com/api/v2';
 
-export async function fetchZetaStatus(): Promise<ZetaStatus> {
-    const [status, components, incidents] = await Promise.all([
-        axios.get(`${ZETA_API_BASE}/status.json`),
-        axios.get(`${ZETA_API_BASE}/components.json`),
-        axios.get(`${ZETA_API_BASE}/incidents/unresolved.json`)
-    ]);
-
-    return {
-        status: status.data,
-        components: components.data,
-        incidents: incidents.data
-    };
+export async function fetchZetaStatus(): Promise<ZetaSummary> {
+    try {
+        const response = await axios.get(`${ZETA_API_BASE}/summary.json`);
+        console.log('API Response:', response.data); // Debug log
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching status:', error);
+        // Return a safe default structure
+        return {
+            page: {
+                id: '',
+                name: '',
+                url: '',
+                time_zone: '',
+                updated_at: new Date().toISOString()
+            },
+            status: {
+                indicator: 'none',
+                description: 'Status Unavailable'
+            },
+            components: [],
+            incidents: [],
+            scheduled_maintenances: []
+        };
+    }
 }

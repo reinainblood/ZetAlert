@@ -2,26 +2,33 @@
 'use client';
 import { useState } from 'react';
 import { IntegrationMessage } from '@/lib/types';
+import axios from 'axios';
 
-export function MessagePanel({
-                                 recentMessages,
-                                 onSendMessage,
-                             }: {
-    recentMessages: IntegrationMessage[];
-    onSendMessage: (message: string, platforms: ('discord' | 'slack')[]) => Promise<void>;
-}) {
+export function MessagePanel() {
     const [message, setMessage] = useState('');
     const [selectedPlatforms, setSelectedPlatforms] = useState<('discord' | 'slack')[]>([]);
     const [sending, setSending] = useState(false);
+    const [recentMessages, setRecentMessages] = useState<IntegrationMessage[]>([]);
 
-    const handleSubmit = async () => {
+    const handleSendMessage = async () => {
         if (!message || selectedPlatforms.length === 0) return;
 
         setSending(true);
         try {
-            await onSendMessage(message, selectedPlatforms);
+            await axios.post('/api/messages', {
+                message,
+                platforms: selectedPlatforms
+            });
+
+            // Add to recent messages
+            setRecentMessages(prev => [{
+                id: Date.now().toString(),
+                platform: selectedPlatforms[0],
+                content: message,
+                timestamp: new Date().toISOString()
+            }, ...prev]);
+
             setMessage('');
-            // Keep the platforms selected for convenience
         } catch (error) {
             console.error('Failed to send message:', error);
         } finally {
@@ -79,7 +86,7 @@ export function MessagePanel({
             </div>
 
             <button
-                onClick={handleSubmit}
+                onClick={handleSendMessage}
                 disabled={sending || !message || selectedPlatforms.length === 0}
                 className="bg-purple-600 px-4 py-2 rounded hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed mb-8"
             >

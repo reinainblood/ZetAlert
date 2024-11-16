@@ -5,20 +5,15 @@ import { MessagePanel } from '@/components/MessagePanel';
 import { WebhookConfig } from '@/components/WebhookConfig';
 import { fetchZetaStatus } from '@/lib/api';
 import { SignOutButton } from '@/components/SignOutButton';
+// @ts-ignore
+import { AppLayout } from '@/components/AppLayout';
 
 export default async function Dashboard() {
     const session = await getServerSession();
     const status = await fetchZetaStatus();
 
     return (
-        <main
-            className="min-h-screen p-8"
-            style={{
-                backgroundImage: 'url(/background.png)',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-            }}
-        >
+        <AppLayout className="p-8">
             <div className="max-w-7xl mx-auto space-y-8">
                 <div className="flex items-center justify-between">
                     <img src="/logo.png" alt="ZetAlert" className="w-32" />
@@ -31,14 +26,9 @@ export default async function Dashboard() {
                 </div>
 
                 <StatusPanel status={status} />
-                <MessagePanel
-                    recentMessages={[]}
-                    onSendMessage={async (message, platforms) => {
-                        // Will implement in next step
-                    }}
-                />
+                <MessagePanel />
                 <WebhookConfig />
             </div>
-        </main>
+        </AppLayout>
     );
 }
