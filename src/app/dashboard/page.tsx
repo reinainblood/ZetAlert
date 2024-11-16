@@ -5,7 +5,6 @@ import { MessagePanel } from '@/components/MessagePanel';
 import { WebhookConfig } from '@/components/WebhookConfig';
 import { fetchZetaStatus } from '@/lib/api';
 import { SignOutButton } from '@/components/SignOutButton';
-// @ts-ignore
 import { AppLayout } from '@/components/AppLayout';
 
 export default async function Dashboard() {

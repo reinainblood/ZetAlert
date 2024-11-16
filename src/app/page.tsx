@@ -2,7 +2,7 @@
 'use client';
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
-import { AppLayout } from '@/components/AppLayout';
+
 
 export default function Home() {
     const [username, setUsername] = useState('');
