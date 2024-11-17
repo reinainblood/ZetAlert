@@ -1,42 +1,22 @@
 // src/components/StatusPanel.tsx
+'use client';
+import { useState } from 'react';
 import { ZetaSummary } from '@/lib/types';
+import { ChevronDown, ChevronUp, AlertCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface StatusPanelProps {
     status: ZetaSummary;
 }
 
-interface NetworkStatus {
-    name: string;
-    status: string;
-    indicator: 'operational' | 'degraded_performance' | 'partial_outage' | 'major_outage';
-}
-
 export function StatusPanel({ status }: StatusPanelProps) {
-    console.log('Received status:', status); // Debug log
-
-    // Ensure components is an array
+    const [isExpanded, setIsExpanded] = useState(false);
     const components = Array.isArray(status?.components) ? status.components : [];
 
-    // Extract mainnet and testnet status
-    const getNetworkStatus = (networkName: string): NetworkStatus | undefined => {
-        const component = components.find((c: ZetaSummary['components'][0]) =>
-            c?.name?.toLowerCase().includes(networkName.toLowerCase())
-        );
+    const mainnet = components.find(c => c?.name?.toLowerCase().includes('mainnet'));
+    const testnet = components.find(c => c?.name?.toLowerCase().includes('testnet'));
 
-        if (component) {
-            return {
-                name: component.name,
-                status: component.status.replace('_', ' '),
-                indicator: component.status
-            };
-        }
-        return undefined;
-    };
-
-    const mainnet = getNetworkStatus('mainnet');
-    const testnet = getNetworkStatus('testnet');
-
-    const getStatusColor = (status: NetworkStatus['indicator']) => {
+    const getStatusColor = (status: string) => {
         switch (status) {
             case 'operational': return 'bg-green-500';
             case 'degraded_performance': return 'bg-yellow-500';
@@ -46,113 +26,100 @@ export function StatusPanel({ status }: StatusPanelProps) {
         }
     };
 
-    // Add error boundary
-    if (!status || !status.status) {
-        return (
-            <div className="bg-gray-900/80 backdrop-blur rounded-lg p-6 text-white">
-                <div className="text-center">
-                    <h2 className="text-xl font-bold mb-2">Status Unavailable</h2>
-                    <p className="text-gray-400">Unable to load status information</p>
-                </div>
-            </div>
-        );
-    }
+    const hasActiveIncidents = status.incidents.length > 0;
+    const hasIssues = mainnet?.status !== 'operational' || testnet?.status !== 'operational';
 
     return (
-        <div className="bg-gray-900/80 backdrop-blur rounded-lg p-6 text-white">
-            {/* Overall Status */}
-            <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold">ZetaChain Status</h2>
-                <div className={`px-3 py-1 rounded ${
-                    status.status.indicator === 'none' ? 'bg-green-500' :
-                        status.status.indicator === 'minor' ? 'bg-yellow-500' :
-                            status.status.indicator === 'major' ? 'bg-orange-500' :
-                                'bg-red-500'
-                }`}>
-                    {status.status.description}
-                </div>
-            </div>
-
-            {/* Network Status Cards */}
-            <div className="grid grid-cols-2 gap-6 mb-6">
-                {mainnet && (
-                    <div className="bg-gray-800/80 p-4 rounded">
-                        <div className="flex items-center justify-between mb-2">
-                            <h3 className="text-lg font-semibold">Mainnet</h3>
-                            <span className={`px-3 py-1 rounded ${getStatusColor(mainnet.indicator)}`}>
-                {mainnet.status}
+        <div className="bg-gray-900/80 backdrop-blur rounded-lg">
+            {/* Collapsed View */}
+            <div
+                className="p-4 cursor-pointer"
+                onClick={() => setIsExpanded(!isExpanded)}
+            >
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                        <h2 className="text-lg font-semibold">Network Status</h2>
+                        {(hasIssues || hasActiveIncidents) && (
+                            <span className="bg-yellow-500/20 text-yellow-500 px-2 py-1 rounded-full text-sm">
+                {hasActiveIncidents ? `${status.incidents.length} Active Incidents` : 'Issues Detected'}
               </span>
-                        </div>
-                        <p className="text-sm text-gray-400">
-                            Last updated: {new Date(status.page.updated_at).toLocaleString()}
-                        </p>
+                        )}
                     </div>
-                )}
-
-                {testnet && (
-                    <div className="bg-gray-800/80 p-4 rounded">
-                        <div className="flex items-center justify-between mb-2">
-                            <h3 className="text-lg font-semibold">Testnet</h3>
-                            <span className={`px-3 py-1 rounded ${getStatusColor(testnet.indicator)}`}>
-                {testnet.status}
-              </span>
-                        </div>
-                        <p className="text-sm text-gray-400">
-                            Last updated: {new Date(status.page.updated_at).toLocaleString()}
-                        </p>
-                    </div>
-                )}
-            </div>
-
-            {/* Active Incidents */}
-            {Array.isArray(status.incidents) && status.incidents.length > 0 && (
-                <div className="mt-6">
-                    <h3 className="text-lg font-semibold mb-3">Active Incidents</h3>
-                    <div className="space-y-4">
-                        {status.incidents.map((incident: ZetaSummary['incidents'][0]) => (
-                            <div key={incident.id} className="bg-gray-800/80 p-4 rounded">
-                                <div className="flex items-center justify-between mb-2">
-                                    <h4 className="font-medium">{incident.name}</h4>
-                                    <span className={`px-2 py-1 rounded text-sm ${
-                                        incident.impact === 'none' ? 'bg-gray-500' :
-                                            incident.impact === 'minor' ? 'bg-yellow-500' :
-                                                incident.impact === 'major' ? 'bg-orange-500' :
-                                                    'bg-red-500'
-                                    }`}>
-                    {incident.status}
-                  </span>
-                                </div>
-                                <div className="text-gray-400 text-sm mt-2 flex justify-between">
-                                    <span>Created: {new Date(incident.created_at).toLocaleString()}</span>
-                                    <span>Updated: {new Date(incident.updated_at).toLocaleString()}</span>
-                                </div>
+                    <div className="flex items-center space-x-4">
+                        {/* Quick Status Indicators */}
+                        <div className="flex items-center space-x-3">
+                            <div className="flex items-center space-x-2">
+                                <span className="text-sm text-gray-400">Mainnet:</span>
+                                <span className={`w-2 h-2 rounded-full ${getStatusColor(mainnet?.status || 'unknown')}`} />
                             </div>
-                        ))}
+                            <div className="flex items-center space-x-2">
+                                <span className="text-sm text-gray-400">Testnet:</span>
+                                <span className={`w-2 h-2 rounded-full ${getStatusColor(testnet?.status || 'unknown')}`} />
+                            </div>
+                        </div>
+                        <button className="p-1 hover:bg-gray-800 rounded-full transition-colors">
+                            {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                        </button>
                     </div>
                 </div>
-            )}
-
-            {/* Other Components */}
-            <div className="mt-6">
-                <h3 className="text-lg font-semibold mb-3">Other Components</h3>
-                <div className="grid grid-cols-2 gap-4">
-                    {components
-                        .filter((component: ZetaSummary['components'][0]) =>
-                            !component?.name?.toLowerCase().includes('mainnet') &&
-                            !component?.name?.toLowerCase().includes('testnet')
-                        )
-                        .map((component: ZetaSummary['components'][0]) => (
-                            <div key={component.id} className="bg-gray-800/80 p-4 rounded">
-                                <div className="flex items-center justify-between">
-                                    <h4 className="font-medium">{component.name}</h4>
-                                    <span className={`px-2 py-1 rounded text-sm ${getStatusColor(component.status)}`}>
-                    {component.status.replace('_', ' ')}
-                  </span>
-                                </div>
-                            </div>
-                        ))}
-                </div>
             </div>
+
+            {/* Expanded View */}
+            <AnimatePresence>
+                {isExpanded && (
+                    <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden border-t border-gray-800"
+                    >
+                        <div className="p-4 space-y-4">
+                            {/* Network Status Details */}
+                            <div className="grid grid-cols-2 gap-4">
+                                {[mainnet, testnet].map((network) => network && (
+                                    <div key={network.name} className="bg-gray-800/50 p-3 rounded-lg">
+                                        <div className="flex items-center justify-between">
+                                            <h3 className="font-medium">{network.name}</h3>
+                                            <span className={`px-2 py-1 rounded text-xs ${getStatusColor(network.status)}`}>
+                        {network.status.replace('_', ' ')}
+                      </span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Active Incidents */}
+                            {hasActiveIncidents && (
+                                <div className="space-y-2">
+                                    <h3 className="font-medium text-sm text-gray-400">Active Incidents</h3>
+                                    {status.incidents.map((incident) => (
+                                        <div key={incident.id} className="bg-gray-800/50 p-3 rounded-lg">
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <p className="font-medium text-sm">{incident.name}</p>
+                                                    <span className="text-xs text-gray-400">
+                            {new Date(incident.updated_at).toLocaleString()}
+                          </span>
+                                                </div>
+                                                <a
+                                                    href={incident.shortlink}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-purple-400 hover:text-purple-300 text-sm"
+                                                >
+                                                    Details →
+                                                </a>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
+

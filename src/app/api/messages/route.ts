@@ -1,6 +1,6 @@
 // src/app/api/messages/route.ts
 import { NextResponse } from 'next/server';
-import { requireAuth } from '../../../lib/auth';
+import { requireAuth } from '@/lib/auth';
 import { sendToDiscord, sendToSlack } from '@/lib/messaging';
 
 export async function POST(req: Request) {

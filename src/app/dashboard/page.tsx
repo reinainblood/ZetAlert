@@ -1,33 +1,44 @@
 // src/app/dashboard/page.tsx
-import { getServerSession } from 'next-auth';
+
+
 import { StatusPanel } from '@/components/StatusPanel';
 import { MessagePanel } from '@/components/MessagePanel';
 import { WebhookConfig } from '@/components/WebhookConfig';
 import { fetchZetaStatus } from '@/lib/api';
-import { SignOutButton } from '@/components/SignOutButton';
+import { Toolbar } from '@/components/Toolbar';
 import { AppLayout } from '@/components/AppLayout';
+import { redirect } from 'next/navigation';
+
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export default async function Dashboard() {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
+
+    if (!session) {
+        redirect('/');
+    }
+
     const status = await fetchZetaStatus();
 
     return (
-        <AppLayout className="p-8">
-            <div className="max-w-7xl mx-auto space-y-8">
-                <div className="flex items-center justify-between">
-                    <img src="/logo.png" alt="ZetAlert" className="w-32" />
-                    <div className="flex items-center gap-4">
-            <span className="text-gray-300">
-              Logged in as {session?.user?.name}
-            </span>
-                        <SignOutButton />
+        <>
+            <Toolbar />
+            <AppLayout className="pt-24 px-8">
+                <div className="max-w-7xl mx-auto space-y-6">
+                    <div className="grid grid-cols-12 gap-6">
+                        <div className="col-span-12">
+                            <StatusPanel status={status} />
+                        </div>
+                        <div className="col-span-12 lg:col-span-8">
+                            <MessagePanel status={status} />
+                        </div>
+                        <div className="col-span-12 lg:col-span-4">
+                            <WebhookConfig />
+                        </div>
                     </div>
                 </div>
-
-                <StatusPanel status={status} />
-                <MessagePanel />
-                <WebhookConfig />
-            </div>
-        </AppLayout>
+            </AppLayout>
+        </>
     );
 }
