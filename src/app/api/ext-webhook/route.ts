@@ -1,6 +1,7 @@
 // src/app/api/ext-webhook/route.ts
 import { NextResponse } from 'next/server';
-import { handleIncomingStatusUpdate, StatusUpdatePayload } from '@/lib/api';
+import { handleIncomingStatusUpdate } from '@/lib/api';
+import { StatusUpdatePayload } from '@/lib/types';
 
 export async function POST(req: Request) {
     try {
@@ -34,7 +35,7 @@ export async function POST(req: Request) {
 function isValidStatusPayload(payload: any): payload is StatusUpdatePayload {
     return (
         payload &&
-        payload.event === 'status_updated' &&
+        payload.event === 'string' &&
         typeof payload.component_id === 'string' &&
         typeof payload.component_name === 'string' &&
         typeof payload.new_status === 'string' &&

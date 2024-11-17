@@ -71,19 +71,30 @@ export interface MaintenanceMessage {
     shortlink: string;
 }
 
+export type TriggerType = 'status_update' | 'incident' | 'maintenance';
+
 export interface IntegrationMessage {
     id: string;
     platform: 'discord' | 'slack';
     content: string;
     timestamp: string;
-    source: 'manual' | 'automatic'; // Add this to distinguish between user-sent and webhook-triggered messages
-    trigger?: {      // Optional context about what triggered the automatic message
-        type: string; //'status_update' | 'incident' | 'maintenance';
+    source: 'manual' | 'automatic';
+    trigger?: {
+        type: TriggerType;
         componentName?: string;
         componentId?: string;
+        incidentId?: string;
     };
     status?: string;
     error?: string;
+}
+export interface StatusUpdatePayload {
+    event: string;
+    component_id: string;
+    component_name: string;
+    new_status: string;
+    incident_id: string;
+    timestamp: string;
 }
 
 export type StatusMessage = IncidentMessage | MaintenanceMessage | string;

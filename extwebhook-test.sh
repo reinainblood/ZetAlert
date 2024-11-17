@@ -1,4 +1,4 @@
-curl -X POST https://zet-alert-dev.vercel.app/api/ext-webhook \
+curl -X POST https://zet-alert-qwrblrfkm-kirsten-ruges-projects.vercel.app/api/ext-webhook \
 -H "Content-Type: application/json" \
 -d '{
   "event": "status_updated",
