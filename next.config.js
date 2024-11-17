@@ -1,14 +1,17 @@
+// next.config.js
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    output: 'standalone',
+    // Remove 'output: standalone' if it's there
+    // Add proper distDir config for Vercel
+    distDir: '.next',
     images: {
         unoptimized: true
     },
     async headers() {
         return [
             {
-                // Specific headers for the webhook endpoint
-                source: "/api/webhook",
+                // Specific headers for the external webhook endpoint
+                source: "/api/ext-webhook",
                 headers: [
                     { key: "Access-Control-Allow-Origin", value: "https://status.zetachain.com" },
                     { key: "Access-Control-Allow-Methods", value: "POST" },
