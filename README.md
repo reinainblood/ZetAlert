@@ -47,7 +47,7 @@ cd zetalert```
 
 Install dependencies:
 
-``npm install``
+```npm install```
 
 Create a .env.local file:
 
