@@ -70,6 +70,13 @@ export interface MaintenanceMessage {
     scheduled_until: string;
     shortlink: string;
 }
+// message type from cron job
+export interface NetworkAlertMessage {
+    type: 'network-alert';
+    network: string;
+    info: string;
+    blocklink: string;
+}
 
 export type TriggerType = 'status_update' | 'incident' | 'maintenance';
 
@@ -88,6 +95,8 @@ export interface IntegrationMessage {
     status?: string;
     error?: string;
 }
+
+
 export interface StatusUpdatePayload {
     event: string;
     component_id: string;
@@ -97,4 +106,4 @@ export interface StatusUpdatePayload {
     timestamp: string;
 }
 
-export type StatusMessage = IncidentMessage | MaintenanceMessage | string;
+export type StatusMessage = IncidentMessage | MaintenanceMessage | NetworkAlertMessage | string;

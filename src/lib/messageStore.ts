@@ -57,4 +57,5 @@ export class MessageStore {
             return { sent: false, platforms: [], type: 'manual' };
         }
     }
+
 }

@@ -1,6 +1,12 @@
 // src/lib/messaging.ts
 import axios, {AxiosResponse} from 'axios';
-import { ZetaSummary, IncidentMessage, MaintenanceMessage, StatusMessage } from './types';
+import {
+    ZetaSummary,
+    IncidentMessage,
+    MaintenanceMessage,
+    StatusMessage,
+    NetworkAlertMessage
+} from './types';
 
 // Type guard functions
 function isIncidentMessage(message: StatusMessage): message is IncidentMessage {
@@ -10,7 +16,9 @@ function isIncidentMessage(message: StatusMessage): message is IncidentMessage {
 function isMaintenanceMessage(message: StatusMessage): message is MaintenanceMessage {
     return typeof message !== 'string' && 'type' in message && message.type === 'maintenance';
 }
-
+function isNetworkAlertMessage(message: StatusMessage): message is NetworkAlertMessage {
+    return typeof message !== 'string' && 'type' in message && message.type === 'network-alert';
+}
 // Helper to convert from API types to our message types
 export function convertIncident(incident: ZetaSummary['incidents'][0]): IncidentMessage {
     return {
@@ -48,6 +56,12 @@ export async function sendToDiscord(message: StatusMessage, webhookUrl: string) 
             `**Updated:** ${new Date(message.updated_at).toLocaleString()}`,
             `**Details:** ${message.shortlink}`
         ].join('\n');
+    } else if (isNetworkAlertMessage(message)) {
+        content = [
+            `:alarm: ** Anomoly in ${message.network} detected by Zetalert`,
+            ` ***Info** ${message.info}`,
+            ` **Link to block explorer** ${message.blocklink}`
+        ].join('\n');
     } else if (isMaintenanceMessage(message)) {
         content = [
             '🗓️ **Scheduled Maintenance Update**',
@@ -63,7 +77,7 @@ export async function sendToDiscord(message: StatusMessage, webhookUrl: string) 
 
     return axios.post(webhookUrl, { content });
 }
-// src/lib/messaging.ts
+
 
 interface SlackBlock {
     type: string;
