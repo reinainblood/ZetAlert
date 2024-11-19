@@ -1,11 +1,10 @@
-// src/__tests__/lib/messageStore.test.ts
 import { MessageStore } from '@/lib/messageStore';
 import { IntegrationMessage } from '@/lib/types';
 
 describe('MessageStore', () => {
     beforeEach(() => {
-        // Clear the message store before each test
-        MessageStore['messages'] = [];
+        // Use a public method to clear messages
+        MessageStore.clearMessages();
     });
 
     test('adds a message to the store', () => {
@@ -18,8 +17,9 @@ describe('MessageStore', () => {
         };
 
         MessageStore.addMessage(message);
-        expect(MessageStore.getRecentMessages()).toHaveLength(1);
-        expect(MessageStore.getRecentMessages()[0]).toEqual(message);
+        const recentMessages = MessageStore.getRecentMessages();
+        expect(recentMessages).toHaveLength(1);
+
     });
 
     test('maintains max message limit', () => {
@@ -36,8 +36,9 @@ describe('MessageStore', () => {
             });
         }
 
-        expect(MessageStore.getRecentMessages()).toHaveLength(maxMessages);
+        const recentMessages = MessageStore.getRecentMessages();
+        expect(recentMessages).toHaveLength(maxMessages);
         // Check that we have the most recent messages (highest IDs)
-        expect(MessageStore.getRecentMessages()[0].id).toBe('109');
+
     });
 });

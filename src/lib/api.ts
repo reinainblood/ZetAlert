@@ -4,6 +4,7 @@ import { ZetaSummary, IntegrationMessage, TriggerType } from './types';
 import { sendToDiscord, sendToSlack } from './messaging';
 import { MessageStore } from './messageStore';
 import { StatusUpdatePayload } from './types'
+import {NextApiRequest, NextApiResponse} from "next";
 
 const ZETA_API_BASE = 'https://status.zetachain.com/api/v2';
 
@@ -101,6 +102,7 @@ export async function handleIncomingStatusUpdate(
         throw error;
     }
 }
+
 export function hasStatusIssue(status: string): boolean {
     return status !== 'operational' && status !== 'none';
 }
