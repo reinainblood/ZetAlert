@@ -42,8 +42,7 @@ ZetAlert is a monitoring and alerting system for ZetaChain networks. It provides
 
 Clone the repository:
 
-```git clone https://github.com/yourusername/zetalert.git
-cd zetalert```
+```git clone https://github.com/yourusername/zetalert.git```
 
 Install dependencies:
 
@@ -73,17 +72,17 @@ Deploy to Vercel:
 **Configuration**
   -  Alert Thresholds
     Modify constants in src/app/api/cron/check-blocks/route.ts:
-typescriptCopyconst BLOCK_TIME_TARGET = 6; // seconds
-const ACCEPTABLE_BLOCK_TIME_VARIANCE = 3; // seconds
-const BLOCK_STALL_THRESHOLD = 30; // seconds
-Cron Schedule
-Edit vercel.json:
-```jsonCopy{
-  "crons": [{
-    "path": "/api/cron/check-blocks",
-    "schedule": "* * * * *"
-  }]
-}```
+   ```const BLOCK_TIME_TARGET = 6; // seconds
+     const ACCEPTABLE_BLOCK_TIME_VARIANCE = 3; // seconds
+      const BLOCK_STALL_THRESHOLD = 30; // seconds ```
+  -  Cron Schedule
+    Edit vercel.json:
+    ```jsonCopy{
+      "crons": [{
+        "path": "/api/cron/check-blocks",
+        "schedule": "* * * * *"
+      }]
+    }```
 
 ## Architecture
 
