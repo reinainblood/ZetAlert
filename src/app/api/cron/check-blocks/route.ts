@@ -27,6 +27,7 @@ const NETWORK = {
 };
 
 async function fetchLatestBlock(): Promise<BlockData> {
+    console.log('Cron job Fetching latest block');
     const response = await fetch('https://status.zetachain.com/api/v2/blocks/latest', {
         next: { revalidate: 0 }
     });
@@ -41,6 +42,15 @@ async function fetchLatestBlock(): Promise<BlockData> {
         timestamp: data.block.header.time,
         block_hash: data.block.block_hash,
     };
+}
+
+// logging to troubleshoot redis
+try {
+     kv.set('test-key', 'test-value');
+    const value =  kv.get('test-key');
+    console.log('Redis test:', value);
+} catch (error) {
+    console.error('Redis error:', error);
 }
 
 async function checkAndStoreBlock(blockData: BlockData): Promise<HealthCheck> {
