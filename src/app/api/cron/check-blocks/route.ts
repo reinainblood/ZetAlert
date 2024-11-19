@@ -3,7 +3,8 @@ import Redis from 'ioredis';
 import { sendToDiscord, sendToSlack } from '@/lib/messaging';
 import type { NetworkAlertMessage } from '@/lib/types';
 
-let redis: Redis;
+
+const redis = new Redis();
 
 
 const REDIS_KEYS = {
