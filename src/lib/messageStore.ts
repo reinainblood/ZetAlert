@@ -1,23 +1,29 @@
-// src/lib/messageStore.ts
-import { kv } from '@vercel/kv';
+import Redis from 'ioredis';
 import { IntegrationMessage } from './types';
 
+let redis: Redis;
+
+
 export class MessageStore {
+    private static messagesKey = 'zetalert:messages'; // namespaced key
     private static maxMessages = 100;
-    private static messagesKey = 'messages';
 
     static async addMessage(message: IntegrationMessage) {
+        if (!redis) return;
+
         try {
-            await kv.lpush(this.messagesKey, JSON.stringify(message));
-            await kv.ltrim(this.messagesKey, 0, this.maxMessages - 1);
+            await redis.lpush(this.messagesKey, JSON.stringify(message));
+            await redis.ltrim(this.messagesKey, 0, this.maxMessages - 1);
         } catch (error) {
             console.error('Failed to store message:', error);
         }
     }
 
     static async getRecentMessages(): Promise<IntegrationMessage[]> {
+        if (!redis) return [];
+
         try {
-            const messages = await kv.lrange(this.messagesKey, 0, -1);
+            const messages = await redis.lrange(this.messagesKey, 0, -1);
             return messages.map(msg => JSON.parse(msg));
         } catch (error) {
             console.error('Failed to fetch messages:', error);
@@ -57,6 +63,4 @@ export class MessageStore {
             return { sent: false, platforms: [], type: 'manual' };
         }
     }
-
-
 }

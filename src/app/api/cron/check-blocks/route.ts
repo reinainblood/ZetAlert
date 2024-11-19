@@ -1,7 +1,14 @@
 import { NextResponse } from 'next/server';
-import { kv } from '@vercel/kv';
+import Redis from 'ioredis';
 import { sendToDiscord, sendToSlack } from '@/lib/messaging';
 import type { NetworkAlertMessage } from '@/lib/types';
+
+let redis: Redis;
+
+
+const REDIS_KEYS = {
+    blockHeights: 'zetalert:block_heights'
+} as const;
 
 interface BlockData {
     height: string;
@@ -27,7 +34,6 @@ const NETWORK = {
 };
 
 async function fetchLatestBlock(): Promise<BlockData> {
-    console.log('Cron job Fetching latest block');
     const response = await fetch('https://status.zetachain.com/api/v2/blocks/latest', {
         next: { revalidate: 0 }
     });
@@ -44,16 +50,11 @@ async function fetchLatestBlock(): Promise<BlockData> {
     };
 }
 
-// logging to troubleshoot redis
-try {
-     kv.set('test-key', 'test-value');
-    const value =  kv.get('test-key');
-    console.log('Redis test:', value);
-} catch (error) {
-    console.error('Redis error:', error);
-}
-
 async function checkAndStoreBlock(blockData: BlockData): Promise<HealthCheck> {
+    if (!redis) {
+        throw new Error('Redis not initialized');
+    }
+
     const alerts: NetworkAlertMessage[] = [];
     const blocklink = `${NETWORK.blockExplorerUrl}${blockData.height}`;
 
@@ -73,30 +74,25 @@ async function checkAndStoreBlock(blockData: BlockData): Promise<HealthCheck> {
 
     try {
         // Store the new block height with its timestamp
-        await kv.zadd(
-            'block_heights',
-            {
-                score: parseInt(blockData.height),
-                member: JSON.stringify({
-                    timestamp: blockData.timestamp,
-                    hash: blockData.block_hash
-                })
-            }
+        await redis.zadd(
+            REDIS_KEYS.blockHeights,
+            parseInt(blockData.height),
+            JSON.stringify({
+                timestamp: blockData.timestamp,
+                hash: blockData.block_hash
+            })
         );
 
         // Get previous blocks with scores
-        // zrange returns [member1, score1, member2, score2, ...]
-        const prevBlocks = await kv.zrange('block_heights', -2, -1, {
-            withScores: true
-        });
+        const prevBlocks = await redis.zrange(REDIS_KEYS.blockHeights, -2, -1, 'WITHSCORES');
 
         // We need at least 4 items (two blocks with their scores) to compare
         if (prevBlocks.length >= 4) {
             // Parse the previous block data
             // Format: [oldBlockData, oldScore, newBlockData, newScore]
-            const prevBlockData = JSON.parse(prevBlocks[0] as string);
-            const prevBlockHeight = JSON.parse(prevBlocks[1] as string); // This is the score, which is the height
-            const currentBlockData = JSON.parse(prevBlocks[2] as string);
+            const prevBlockData = JSON.parse(prevBlocks[0]);
+            const prevBlockHeight = parseInt(prevBlocks[1]);
+            const currentBlockData = JSON.parse(prevBlocks[2]);
 
             const prevBlockTime = new Date(prevBlockData.timestamp);
             const currentBlockTime = new Date(currentBlockData.timestamp);
@@ -114,7 +110,7 @@ async function checkAndStoreBlock(blockData: BlockData): Promise<HealthCheck> {
             }
 
             // Check for missing blocks
-            const heightDiff = parseInt(blockData.height) - parseInt(prevBlockHeight.toString());
+            const heightDiff = parseInt(blockData.height) - prevBlockHeight;
             if (heightDiff > 1) {
                 alerts.push({
                     type: 'network-alert',
@@ -126,9 +122,9 @@ async function checkAndStoreBlock(blockData: BlockData): Promise<HealthCheck> {
         }
 
         // Cleanup old data
-        const oldBlocks = await kv.zrange('block_heights', 0, -MAX_STORED_BLOCKS);
+        const oldBlocks = await redis.zrange('block_heights', 0, -MAX_STORED_BLOCKS);
         if (oldBlocks.length > 0) {
-            await kv.zrem('block_heights', ...oldBlocks);
+            await redis.zrem('block_heights', ...oldBlocks);
         }
 
     } catch (error) {
@@ -149,6 +145,10 @@ async function checkAndStoreBlock(blockData: BlockData): Promise<HealthCheck> {
 
 export async function GET(req: Request) {
     try {
+        if (!redis) {
+            throw new Error('Redis not initialized');
+        }
+
         const latestBlock = await fetchLatestBlock();
         const healthCheck = await checkAndStoreBlock(latestBlock);
 

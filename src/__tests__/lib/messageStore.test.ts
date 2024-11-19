@@ -4,7 +4,7 @@ import { IntegrationMessage } from '@/lib/types';
 describe('MessageStore', () => {
     beforeEach(() => {
         // Use a public method to clear messages
-        MessageStore.clearMessages();
+      //  MessageStore.clearMessages();
     });
 
     test('adds a message to the store', () => {
