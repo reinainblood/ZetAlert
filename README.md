@@ -50,10 +50,7 @@ Install dependencies:
 
 Create a .env.local file:
 
-```DISCORD_WEBHOOK_URL=your_discord_webhook_url
-   SLACK_WEBHOOK_URL=your_slack_webhook_url
-  DEMO_USER=admin
-  DEMO_PASS=your_pass```
+```DISCORD_WEBHOOK_URL=your_discord_webhook_url \ SLACK_WEBHOOK_URL=your_slack_webhook_url \ DEMO_USER=username \ DEMO_PASS=your_pass```
 
 Start the development server:
 
@@ -72,17 +69,17 @@ Deploy to Vercel:
 **Configuration**
   -  Alert Thresholds
     Modify constants in src/app/api/cron/check-blocks/route.ts:
-   ```const BLOCK_TIME_TARGET = 6; // seconds
-     const ACCEPTABLE_BLOCK_TIME_VARIANCE = 3; // seconds
-      const BLOCK_STALL_THRESHOLD = 30; // seconds ```
+     ```const BLOCK_TIME_TARGET = 6; // seconds
+        const ACCEPTABLE_BLOCK_TIME_VARIANCE = 3; // seconds
+        const BLOCK_STALL_THRESHOLD = 30; // seconds ```
   -  Cron Schedule
     Edit vercel.json:
-    ```jsonCopy{
-      "crons": [{
-        "path": "/api/cron/check-blocks",
-        "schedule": "* * * * *"
-      }]
-    }```
+      ```jsonCopy{
+           "crons": [{
+           "path": "/api/cron/check-blocks",
+            "schedule": "* * * * *"
+        }]
+      }```
 
 ## Architecture
 
@@ -94,8 +91,8 @@ Automated requests: Vercel Cron Jobs
 
 ## Development
 
-Project Structure
-Copysrc/
+**Project Structure**
+src/
   app/              # Next.js app router
     api/            # API routes
     dashboard/      # Dashboard pages
