@@ -51,9 +51,9 @@ Install dependencies:
 Create a .env.local file:
 
 ```DISCORD_WEBHOOK_URL=your_discord_webhook_url
-SLACK_WEBHOOK_URL=your_slack_webhook_url
-DEMO_USER=admin
-DEMO_PASS=your_pass```
+   SLACK_WEBHOOK_URL=your_slack_webhook_url
+  DEMO_USER=admin
+  DEMO_PASS=your_pass```
 
 Start the development server:
 
