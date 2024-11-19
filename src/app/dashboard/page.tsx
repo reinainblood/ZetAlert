@@ -1,44 +1,40 @@
-// src/app/dashboard/page.tsx
-
-
+import { getServerSession } from 'next-auth';
 import { StatusPanel } from '@/components/StatusPanel';
+import { AutomatedAlerts } from '@/components/AutomatedAlerts';
 import { MessagePanel } from '@/components/MessagePanel';
 import { WebhookConfig } from '@/components/WebhookConfig';
 import { fetchZetaStatus } from '@/lib/api';
-import { Toolbar } from '@/components/Toolbar';
-import { AppLayout } from '@/components/AppLayout';
-import { redirect } from 'next/navigation';
-
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { SignOutButton } from '@/components/SignOutButton';
 
 export default async function Dashboard() {
-    const session = await getServerSession(authOptions);
-
-    if (!session) {
-        redirect('/');
-    }
-
+    const session = await getServerSession();
     const status = await fetchZetaStatus();
 
     return (
-        <>
-            <Toolbar />
-            <AppLayout className="pt-24 px-8">
-                <div className="max-w-7xl mx-auto space-y-6">
-                    <div className="grid grid-cols-12 gap-6">
-                        <div className="col-span-12">
-                            <StatusPanel status={status} />
-                        </div>
-                        <div className="col-span-12 lg:col-span-8">
-                            <MessagePanel status={status} />
-                        </div>
-                        <div className="col-span-12 lg:col-span-4">
-                            <WebhookConfig />
-                        </div>
+        <main
+            className="min-h-screen p-8"
+            style={{
+                backgroundImage: 'url(/background.png)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+            }}
+        >
+            <div className="max-w-7xl mx-auto space-y-8">
+                <div className="flex items-center justify-between">
+                    <img src="/logo.png" alt="ZetAlert" className="w-32" />
+                    <div className="flex items-center gap-4">
+            <span className="text-gray-300">
+              Logged in as {session?.user?.name}
+            </span>
+                        <SignOutButton />
                     </div>
                 </div>
-            </AppLayout>
-        </>
+
+                <StatusPanel status={status} />
+                <AutomatedAlerts />
+                <MessagePanel status={status} />
+                <WebhookConfig />
+            </div>
+        </main>
     );
 }
