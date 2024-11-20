@@ -6,7 +6,7 @@ import { getRedisClient } from '@/lib/redis';
 
 
 
-
+const redis = getRedisClient();
 
 const REDIS_KEYS = {
     blockHeights: 'zetalert:block_heights'
@@ -53,7 +53,7 @@ async function fetchLatestBlock(): Promise<BlockData> {
 }
 
 async function checkAndStoreBlock(blockData: BlockData): Promise<HealthCheck> {
-    const redis = getRedisClient();
+
     const alerts: NetworkAlertMessage[] = [];
     const blocklink = `${NETWORK.blockExplorerUrl}${blockData.height}`;
 
