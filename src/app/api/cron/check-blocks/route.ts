@@ -8,9 +8,8 @@ import { getRedisClient } from '@/lib/redis';
 
 const redis = getRedisClient();
 
-const REDIS_KEYS = {
-    blockHeights: 'zetalert:block_heights'
-} as const;
+const REDIS_KEY = 'zetalert:block_heights'
+
 
 interface BlockData {
     height: string;
@@ -74,7 +73,7 @@ async function checkAndStoreBlock(blockData: BlockData): Promise<HealthCheck> {
     try {
         // Store the new block height with its timestamp
         await redis.zadd(
-            REDIS_KEYS.blockHeights,
+            REDIS_KEY,
             parseInt(blockData.height),
             JSON.stringify({
                 timestamp: blockData.timestamp,
@@ -83,7 +82,7 @@ async function checkAndStoreBlock(blockData: BlockData): Promise<HealthCheck> {
         );
 
         // Get previous blocks with scores
-        const prevBlocks = await redis.zrange(REDIS_KEYS.blockHeights, -2, -1, 'WITHSCORES');
+        const prevBlocks = await redis.zrange(REDIS_KEY, -2, -1, 'WITHSCORES');
 
         // We need at least 4 items (two blocks with their scores) to compare
         if (prevBlocks.length >= 4) {
