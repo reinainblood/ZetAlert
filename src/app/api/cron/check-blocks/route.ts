@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
-import Redis from 'ioredis';
 import { sendToDiscord, sendToSlack } from '@/lib/messaging';
 import type { NetworkAlertMessage } from '@/lib/types';
+import { getRedisClient } from '@/lib/redis';
 
 
-const redis = new Redis();
+
+
 
 
 const REDIS_KEYS = {
@@ -52,10 +53,7 @@ async function fetchLatestBlock(): Promise<BlockData> {
 }
 
 async function checkAndStoreBlock(blockData: BlockData): Promise<HealthCheck> {
-    if (!redis) {
-        throw new Error('Redis not initialized');
-    }
-
+    const redis = getRedisClient();
     const alerts: NetworkAlertMessage[] = [];
     const blocklink = `${NETWORK.blockExplorerUrl}${blockData.height}`;
 
@@ -146,10 +144,7 @@ async function checkAndStoreBlock(blockData: BlockData): Promise<HealthCheck> {
 
 export async function GET(req: Request) {
     try {
-        if (!redis) {
-            throw new Error('Redis not initialized');
-        }
-
+    //    const redis = getRedisClient();
         const latestBlock = await fetchLatestBlock();
         const healthCheck = await checkAndStoreBlock(latestBlock);
 

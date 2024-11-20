@@ -1,17 +1,13 @@
-import Redis from 'ioredis';
 import { IntegrationMessage } from './types';
-
-let redis: Redis;
-
+import { getRedisClient } from './redis';
 
 export class MessageStore {
-    private static messagesKey = 'zetalert:messages'; // namespaced key
+    private static messagesKey = 'zetalert:messages';
     private static maxMessages = 100;
 
     static async addMessage(message: IntegrationMessage) {
-        if (!redis) return;
-
         try {
+            const redis = getRedisClient();
             await redis.lpush(this.messagesKey, JSON.stringify(message));
             await redis.ltrim(this.messagesKey, 0, this.maxMessages - 1);
         } catch (error) {
@@ -20,9 +16,8 @@ export class MessageStore {
     }
 
     static async getRecentMessages(): Promise<IntegrationMessage[]> {
-        if (!redis) return [];
-
         try {
+            const redis = getRedisClient();
             const messages = await redis.lrange(this.messagesKey, 0, -1);
             return messages.map(msg => JSON.parse(msg));
         } catch (error) {
@@ -30,6 +25,7 @@ export class MessageStore {
             return [];
         }
     }
+
 
     static async hasBeenSent(incidentId: string): Promise<{
         sent: boolean;
